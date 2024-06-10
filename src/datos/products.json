@@ -1,0 +1,62 @@
+[
+    {
+    "id": 1,
+    "title": "Adidas Forum Low",
+    "description": "Sneaker urbanas" ,
+    "code": "Z00P",
+    "price": 230000,
+    "status": true,
+    "stock": 20,
+    "category": "calzado",
+    "thumbnails": "https://assets.adidas.com/images/w_600,f_auto,q_auto/ffe40fe134fe425cb77fafcb01190d8c_9366/Zapatillas_Forum_Low_Blanco_IE7175_01_standard.jpg"
+    
+    },
+    {
+    "id": 2,
+    "title": "Adidas Forum Low",
+    "description": "Sneaker urbanas" ,
+    "code": "Z00P",
+    "price": 232000,
+    "status": true,
+    "stock": 20,
+    "category": "calzado",
+    "thumbnails": "https://assets.adidas.com/images/h_840,f_auto,q_auto,fl_lossy,c_fill,g_auto/c0fc9f23b62d485fa6a6afb90126912f_9366/Zapatillas_Forum_Low_Beige_IF5165_01_standard.jpg"
+    
+    },
+       {
+    "id": 3,
+    "title": "Adidas Forum Low",
+    "description": "Sneaker urbanas" ,
+    "code": "Z00P",
+    "price": 233000,
+    "status": true,
+    "stock": 20,
+    "category": "calzado",
+    "thumbnails": "https://cdn-images.farfetch-contents.com/19/20/88/30/19208830_42071453_600.jpg"
+    },
+       {
+    "id": 4,
+    "title": "Adidas Forum Low",
+    "description": "Sneaker urbanas" ,
+    "code": "Z00P",
+    "price": 232000,
+    "status": true,
+    "stock": 20,
+    "category": "calzado",
+    "thumbnails": "https://assets.adidas.com/images/w_600,f_auto,q_auto/59a24b7fdb3249ac9d85afb900137dfe_9366/Zapatillas_Forum_Low_Gris_IE7217_01_standard.jpg"
+
+    },
+       {
+    "id": 5,
+    "title": "Adidas Forum Low",
+    "description": "Sneaker urbanas" ,
+    "code": "Z00P",
+    "price": 233000,
+    "status": true,
+    "stock": 20,
+    "category": "calzado",
+    "thumbnails": "https://assets.adidas.com/images/w_600,f_auto,q_auto/ffe40fe134fe425cb77fafcb01190d8c_9366/Zapatillas_Forum_Low_Blanco_IE7175_01_standard.jpg"
+
+    }
+
+]

@@ -1,6 +1,8 @@
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import ProductManager from "../controllers/product-manager.js";
+const productManager = new ProductManager("./src/datos/products.json");
 
 const router = express.Router();
 
@@ -14,6 +16,7 @@ let getProductsJSON = () => {
         console.error("Error al leer los productos", error);
         return [];
     }
+    
 };
 
 const saveProducts = async (products) => {
@@ -22,6 +25,18 @@ const saveProducts = async (products) => {
 
 //obtenemos los productos con un limitador
 
+router.get('/api/productos', async (req, res) => {
+    try {
+        const productos = await productManager.getProducts();
+        res.json(productos);
+    } catch (error) {
+        res.status(500).json({ error: 'Error al obtener los productos' });
+    }
+});
+
+
+
+/*
 router.get("/", (request, response) => {
     const { limit } = request.query;
     const products = getProductsJSON();
@@ -31,7 +46,7 @@ router.get("/", (request, response) => {
         response.json(products);
     }
 });
-
+*/
 //obtenemos los productos seguin el id indicado
 router.get("/:pid", (request, response) => {
     const { pid } = request.params;
@@ -44,41 +59,21 @@ router.get("/:pid", (request, response) => {
     }
 });
 
-//creamos un prodcuto nuevo respetando los valores requeridos
-router.post("/", (request, response) => {
-    const {
-        title,
-        description,
-        code,
-        price,
-        status = true, // Valor por defecto
-        stock,
-        category,
-        thumbnails = [] // Valor por defecto
-    } = request.body;
+//creamos un producto nuevo 
+router.post("/", async (req, res) => {
+    const nuevoProducto = req.body;
 
-    if (!title || !description || !code || !price || !stock || !category) {
-        return response.status(400).json({ message: "Todos los campos son obligatorios excepto thumbnails" });
+    try {
+        await productManager.addProduct(nuevoProducto);
+        res.status(201).json({
+            message: "Producto agregado exitosamente"
+        });
+    } catch (error) {
+        console.error("Error al agregar producto", error);
+        res.status(500).json({
+            error: "Error interno del servidor"
+        });
     }
-
-    const products = getProductsJSON();
-    const nextID = products.length ? Math.max(products.map(p => p.id)) + 1 : 1;
-
-    const newProduct = {
-        id: nextID,
-        title,
-        description,
-        code,
-        price,
-        status,
-        stock,
-        category,
-        thumbnails
-    };
-
-    products.push(newProduct);
-    saveProducts(products);
-    response.status(201).json({ message: "Producto agregado exitosamente", newProduct });
 });
 
 //actualizamos los valores

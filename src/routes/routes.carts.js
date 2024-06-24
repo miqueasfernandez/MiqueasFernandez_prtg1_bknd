@@ -1,9 +1,11 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
+import CartManager from "../controllers/cart-manager.js";
 
 const router = express.Router();
 
+const cartManager = new CartManager("./src/datos/carts.json");
 const productsJson = path.resolve("./src/datos/products.json");
 const carritoJson = path.resolve("./src/datos/carts.json");
 
@@ -43,15 +45,15 @@ router.get("/", (request, response) => {
 });
 
 // Crear un nuevo carrito
-router.post("/", (req, res) => {
-    const carts = getCartsJSON();
-    const ID = (carts.length ? Math.max(...carts.map((c) => parseInt(c.ID))) : 0) + 1;
-    const newCart = { ID: ID.toString(), products: [] };
-    carts.push(newCart);
-    saveCarts(carts);
-    res.status(201).json({ message: `Carrito con el id ${ID} fue creado exitosamente`, newCart });
+router.post("/", async (req, res) => {
+    try {
+        const nuevoCarrito = await cartManager.crearCarrito();
+        res.json(nuevoCarrito);
+    } catch (error) {
+        console.error("Error al crear un nuevo carrito", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
 });
-
 // Añadir un producto al carrito con el id indicado
 router.post("/:cid/product/:pid", (request, response) => {
     const carts = getCartsJSON();

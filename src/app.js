@@ -1,17 +1,63 @@
 import express from "express";
+import { engine } from "express-handlebars";
+import { Server } from "socket.io";
 import productsRouter from "./routes/routes.products.js";
 import cartsRouter from "./routes/routes.carts.js";
-
+import viewsRouter from "./routes/router.views.js";
+import exphbs from "express-handlebars";
+import displayRoutes from "express-routemap";
 
 const app = express();
 const port = 8080
-app.use(express.json());
 
-app.use("/api/routes.products", productsRouter);
-app.use("/api/routes.carts", cartsRouter);
+//rutas
+app.use("/api/products", productsRouter);
+app.use("/api/carts", cartsRouter);
+app.use("/", viewsRouter);
+
+//middleware
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(express.static("./src/public"))
+
+
+//express-handlebars
+app.engine("handlebars", engine());
+app.engine("handlebars", exphbs.engine());
+app.set("view engine", "handlebars");
+app.set("views", "./src/views")
+
 
 //escuchamos en el puerto para verificar que funciona 
-app.listen(port, () => {
+const httpServer = app.listen(port, () => {
+    displayRoutes(app)
     console.log(`listening port; ${port} successfully`);
 });
+
+
+import ProductManager from "./controllers/product-manager.js";
+const productManager = new ProductManager("./src/datos/productos.json")
+
+const io = new Server(httpServer);
+
+io.on("connection", async (socket) => {
+    console.log("Un cliente se conecto");
+    //enviamos un array de productos
+    socket.emit("productos", await productManager.getProducts());
+
+    //recibimos el evento eliminarproducto desde front
+    socket.on("eliminarProducto", async (id)=>{
+        await productManager.deleteProduct(id);
+
+        //le einvio la lista actualizada al cliente
+        io.socket.emit("productos", await productManager.getProducts())
+    })
+
+    //agregamos producto desde el form
+
+    socket.on("agregarProducto", async (producto)=>{
+        await productManager.addProduct(producto);
+        io.socket.emit("productos", await productManager.getProducts())
+    })
+});
+

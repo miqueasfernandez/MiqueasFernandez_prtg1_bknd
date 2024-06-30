@@ -36,12 +36,13 @@ const httpServer = app.listen(port, () => {
 
 
 import ProductManager from "./controllers/product-manager.js";
-const productManager = new ProductManager("./src/datos/productos.json")
+const productManager = new ProductManager("./src/datos/products.json")
 
 const io = new Server(httpServer);
 
 io.on("connection", async (socket) => {
     console.log("Un cliente se conecto");
+    
     //enviamos un array de productos
     socket.emit("productos", await productManager.getProducts());
 

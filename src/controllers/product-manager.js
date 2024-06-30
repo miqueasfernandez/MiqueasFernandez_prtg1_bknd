@@ -1,5 +1,5 @@
-import  fs  from "fs";
 
+import { promises as fs } from "fs";
 
 class ProductManager {
     static ultId = 0; 

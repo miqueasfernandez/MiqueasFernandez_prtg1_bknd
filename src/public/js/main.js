@@ -2,6 +2,7 @@ const socket = io();
 
 socket.on("productos", (data) => {
     renderProductos(data);
+    console.log(data);
 })
 
 //Función para renderizar nuestros productos: 

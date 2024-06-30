@@ -6,7 +6,7 @@ router.get("/realtimeproducts", async (req, res) => {
 })
 
 router.get("/productos", async (req, res) => {
-    res.render("home", {});
+    res.render("home");
 })
 
 export default router;

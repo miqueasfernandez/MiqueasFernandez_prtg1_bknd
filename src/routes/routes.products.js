@@ -1,12 +1,12 @@
 import express from 'express';
 import fs from 'fs';
-import path from 'path';
+
 import ProductManager from "../controllers/product-manager.js";
 const productManager = new ProductManager("./src/datos/products.json");
 
 const router = express.Router();
 
-const productsJson = path.resolve("./src/datos/products.json");
+
 
 let getProductsJSON = () => {
     try {

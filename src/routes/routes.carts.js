@@ -1,11 +1,11 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
-import CartManager from "../controllers/cart-manager.js";
+import CartManager from "../dao/db/cart-manager-mongo.js";
 
 const router = express.Router();
 
-const cartManager = new CartManager("./src/datos/carts.json");
+const cartManager = new CartManager;
 const productsJson = path.resolve("./src/datos/products.json");
 const carritoJson = path.resolve("./src/datos/carts.json");
 
@@ -54,26 +54,40 @@ router.post("/", async (req, res) => {
         res.status(500).json({ error: "Error interno del servidor" });
     }
 });
+
+//) Listamos los productos que pertenecen a determinado carrito. 
+
+router.get("/:cid", async (req, res) => {
+    const cartId = req.params.cid;
+
+    try {
+        const carrito = await CartModel.findById(cartId)
+            
+        if (!carrito) {
+            console.log("No existe ese carrito con el id");
+            return res.status(404).json({ error: "Carrito no encontrado" });
+        }
+
+        return res.json(carrito.products);
+    } catch (error) {
+        console.error("Error al obtener el carrito", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+
 // Añadir un producto al carrito con el id indicado
-router.post("/:cid/product/:pid", (request, response) => {
-    const carts = getCartsJSON();
-    const products = getProductsJSON();
+router.post("/:cid/product/:pid", async (req, res) => {
+    const cartId = req.params.cid;
+    const productId = req.params.pid;
+    const quantity = req.body.quantity || 1;
 
-    const cart = carts.find((c) => c.id === parseInt(request.params.cid));
-    if (!cart) {
-        return response.status(404).json({ message: `Carrito con el id ${request.params.cid} no fue encontrado` });
-    }
-
-    const product = products.find((p) => p.id === parseInt(request.params.pid));
-    if (!product) {
-        return response.status(404).json({ message: `Producto con el id ${request.params.pid} no fue encontrado` });
-    }
-
-    const productIndex = cart.products.findIndex((p) => p.product === parseInt(request.params.pid));
-    if (productIndex === -1) {
-        cart.products.push({ product: parseInt(request.params.pid), quantity: 1 });
-    } else {
-        cart.products[productIndex].quantity += 1;
+    try {
+        const actualizarCarrito = await cartManager.agregarProductoAlCarrito(cartId, productId, quantity);
+        res.json(actualizarCarrito.products);
+    } catch (error) {
+        console.error("Error al agregar producto al carrito", error);
+        res.status(500).json({ error: "Error interno del servidor" });
     }
 
     saveCarts(carts);

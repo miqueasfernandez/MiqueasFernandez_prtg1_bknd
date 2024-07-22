@@ -7,6 +7,7 @@ import viewsRouter from "./routes/router.views.js";
 import exphbs from "express-handlebars";
 import displayRoutes from "express-routemap";
 
+
 const app = express();
 const port = 8080
 
@@ -35,11 +36,11 @@ const httpServer = app.listen(port, () => {
 });
 
 
-import ProductManager from "./controllers/product-manager.js";
+import ProductManager from "./dao/fs/product-manager.js";
 const productManager = new ProductManager("./src/datos/products.json")
 
 const io = new Server(httpServer);
-
+/*
 io.on("connection", async (socket) => {
     console.log("Un cliente se conecto");
     
@@ -61,4 +62,10 @@ io.on("connection", async (socket) => {
         io.socket.emit("productos", await productManager.getProducts())
     })
 });
+*/
 
+import mongoose from "mongoose";
+
+mongoose.connect("mongodb+srv://kanadesing:negros333@cluster0.cdmifvc.mongodb.net/eccomerce?retryWrites=true&w=majority&appName=Cluster0")
+    .then( () => console.log("conexion exitosa!"))
+    .catch( (error) => console.log("error de conexion", error));

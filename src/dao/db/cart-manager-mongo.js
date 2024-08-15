@@ -47,6 +47,24 @@ class CartManager {
         }
     }
 
+    async updatecart(id, carritoActualizado) {
+        try {
+
+            const carritoAct = await CartModelModel.findByIdAndUpdate(id, carritoActualizado);
+
+            if (!carritoAct) {
+                console.log("No se encontro el carrito");
+                return null;
+            }
+
+            console.log("carrito actualizado con exito");
+            return carritoAct;
+        } catch (error) {
+            console.log("Error al actualizar el carrito", error);
+
+        }
+    }
+
     async deleteCart(id) {
         try {
             const borrado = await CartModel.findByIdAndDelete(id)

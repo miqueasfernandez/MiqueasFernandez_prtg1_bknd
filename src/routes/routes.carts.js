@@ -50,6 +50,26 @@ router.post("/:cid/product/:pid", async (req, res) => {
     }
 });
 
+router.put("/:cid", async (req, res)=>{
+    const id = req.params.cid;
+    const CarritoActualizado = req.body;
+
+    try {
+        await cartManager.updatecart(id, CarritoActualizado);
+        res.json({
+            message: "carrito actualizado exitosamente"
+        });
+    } catch (error) {
+        console.error("Error al actualizar carrito", error);
+        res.status(500).json({
+            error: "Error interno del servidor"
+        });
+    }
+});
+
+
+
+
 router.delete("/:cid", async (req, res) =>{
     const cartId = req.params.cid;
 

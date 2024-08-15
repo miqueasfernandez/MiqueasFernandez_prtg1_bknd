@@ -36,6 +36,7 @@ router.get("/products", async (req, res) => {
             hasPrevPage: productos.hasPrevPage,
             hasNextPage: productos.hasNextPage,
         });
+        
     } catch (error) {
         res.status(500).json({ error: 'Error al obtener los productos del render products ' });
     }

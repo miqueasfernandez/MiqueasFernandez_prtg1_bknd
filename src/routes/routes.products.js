@@ -100,16 +100,20 @@ router.put("/:pid", async (req, res) => {
 });
 
 //borramos los valores indicados segun el id
-router.delete("/:pid", (request, response) => {
-    const products = getProductsJSON();
-    const newProducts = products.filter((p) => p.id !== (request.params.pid));
+router.delete("/:pid", async (req, res) => {
+    const id = req.params.pid;
 
-    if (newProducts.length === products.length) {
-        return response.status(404).json({ message: `Producto con el ID ${request.params.pid} no se encontró` });
+    try {
+        await productManager.deleteProduct(id);
+        res.json({
+            message: "Producto eliminado exitosamente"
+        });
+    } catch (error) {
+        console.error("Error al eliminar producto", error);
+        res.status(500).json({
+            error: "Error interno del servidor"
+        });
     }
-
-    saveProducts(newProducts);
-    response.status(200).json({ message: `Producto con el ID ${request.params.pid} ha sido borrado exitosamente` });
 });
 
 export default router;

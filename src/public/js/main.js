@@ -1,4 +1,4 @@
-const socket = io(); 
+/*const socket = io(); 
 
 socket.on("productos", (data) => {
     renderProductos(data);
@@ -51,3 +51,4 @@ const agregarProducto = () =>{
     }
     socket.emit("agregarProducto", producto)
 }
+*/

@@ -1,50 +1,11 @@
 import express from "express";
-import fs from "fs";
-import path from "path";
-import CartManager from "../dao/db/cart-manager-mongo.js";
-
 const router = express.Router();
+import CartManager from "../dao/db/cart-manager-mongo.js";
+const cartManager = new CartManager();
+import CartModel from "../dao/models/carts.model.js";
 
-const cartManager = new CartManager;
-const productsJson = path.resolve("./src/datos/products.json");
-const carritoJson = path.resolve("./src/datos/carts.json");
 
-const getCartsJSON = () => {
-    try {
-        const data = fs.readFileSync(carritoJson, "utf-8");
-        return JSON.parse(data) || [];
-    } catch (error) {
-        console.error("Error al leer los archivos", error);
-        return [];
-    }
-};
-
-const getProductsJSON = () => {
-    try {
-        const data = fs.readFileSync(productsJson, "utf-8");
-        return JSON.parse(data) || [];
-    } catch (error) {
-        console.error("Error al leer los productos", error);
-        return [];
-    }
-};
-
-const saveCarts = async (carts) => {
-    await fs.promises.writeFile(carritoJson, JSON.stringify(carts, null, 2));
-};
-
-// Obtener todos los carritos desde el carts.JSON
-router.get("/", (request, response) => {
-    const { limit } = request.query;
-    const carts = getCartsJSON();
-    if (limit) {
-        response.json(carts.slice(0, limit));
-    } else {
-        response.json(carts);
-    }
-});
-
-// Crear un nuevo carrito
+// creamos un carrito nuevo
 router.post("/", async (req, res) => {
     try {
         const nuevoCarrito = await cartManager.crearCarrito();
@@ -55,8 +16,7 @@ router.post("/", async (req, res) => {
     }
 });
 
-//) Listamos los productos que pertenecen a determinado carrito. 
-
+// listado de productos de dicho carrito 
 router.get("/:cid", async (req, res) => {
     const cartId = req.params.cid;
 
@@ -75,8 +35,7 @@ router.get("/:cid", async (req, res) => {
     }
 });
 
-
-// Añadir un producto al carrito con el id indicado
+// agregar productos a los carritos
 router.post("/:cid/product/:pid", async (req, res) => {
     const cartId = req.params.cid;
     const productId = req.params.pid;
@@ -89,9 +48,23 @@ router.post("/:cid/product/:pid", async (req, res) => {
         console.error("Error al agregar producto al carrito", error);
         res.status(500).json({ error: "Error interno del servidor" });
     }
-
-    saveCarts(carts);
-    return response.status(200).json({ message: "Producto añadido al carrito" });
 });
+
+router.delete("/:cid", async (req, res) =>{
+    const cartId = req.params.cid;
+
+    try {
+        await cartManager.deleteCart(cartId);
+        res.json({
+            message: "carrito eliminado exitosamente"
+        });
+    } catch (error) {
+        console.error("Error al eliminar carrito", error);
+        res.status(500).json({
+            error: "Error interno del servidor"
+        });
+    }
+});
+
 
 export default router;

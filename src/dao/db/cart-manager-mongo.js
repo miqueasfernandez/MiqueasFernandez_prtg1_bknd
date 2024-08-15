@@ -46,6 +46,21 @@ class CartManager {
             console.log("error al agregar un producto", error);
         }
     }
+
+    async deleteCart(id) {
+        try {
+            const borrado = await CartModel.findByIdAndDelete(id)
+            if(!borrado){
+                console.log("no se encuentra el carrito que desea eliminar o no existe");
+            }else{
+                console.log("se elimino el carrito");
+                return borrado
+            }
+        } catch (error) {
+            console.log("Error al eliminar el carrito", error);
+            throw error;
+        }
+    }
 }
 
 export default CartManager;

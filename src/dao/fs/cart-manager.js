@@ -1,56 +1,29 @@
-import { promises as fs } from "fs";
+import CartModel from "../models/carts.model.js";
 
 class CartManager {
-    constructor(path) {
-        this.carts = [];
-        this.path = path;
-        this.ultId = 0;
-
-        // Cargar los carritos almacenados en el archivo
-        this.cargarCarritos();
+    constructor() {
+        
     }
 
-    async cargarCarritos() {
+    // Crear un carrito nuevo
+    async crearCarrito() {
         try {
-            const data = await fs.readFile(this.path, "utf8");
-            this.carts = JSON.parse(data);
-            if (this.carts.length > 0) {
-                //Verifico si hay por lo menos un carrito creado:
-                this.ultId = Math.max(...this.carts.map(cart => cart.id));
-                //Utilizo el método map para crear un nuevo array que solo tenga los identificadores del carrito y con Math.max obtengo el mayor. 
-            }
+            const nuevoCarrito = new CartModel({ products: [] });
+            await nuevoCarrito.save();
+            return nuevoCarrito;
         } catch (error) {
-            console.error("Error al cargar los carritos desde el archivo", error);
-            // Si no existe el archivo, lo voy a crear. 
-            await this.guardarCarritos();
+            console.error("Error al crear el carrito", error);
+            throw error;
         }
     }
 
-    async guardarCarritos() {
-        await fs.writeFile(this.path, JSON.stringify(this.carts, null, 2));
-    }
-
-    async crearCarrito() {
-        const nuevoCarrito = {
-            id: ++this.ultId,
-            products: []
-        };
-
-        this.carts.push(nuevoCarrito);
-
-        // Guardamos el array en el archivo
-        await this.guardarCarritos();
-        return nuevoCarrito;
-    }
-
+    // Obtener carrito por ID
     async getCarritoById(cartId) {
         try {
-            const carrito = this.carts.find(c => c.id === cartId);
-
+            const carrito = await CartModel.findById(cartId);
             if (!carrito) {
                 throw new Error(`No existe un carrito con el id ${cartId}`);
             }
-
             return carrito;
         } catch (error) {
             console.error("Error al obtener el carrito por ID", error);
@@ -58,18 +31,50 @@ class CartManager {
         }
     }
 
+    // Agregar producto al carrito
     async agregarProductoAlCarrito(cartId, productId, quantity = 1) {
-        const carrito = await this.getCarritoById(cartId);
-        const existeProducto = carrito.products.find(p => p.product === productId);
+        try {
+            const carrito = await this.getCarritoById(cartId);
 
-        if (existeProducto) {
-            existeProducto.quantity += quantity;
-        } else {
-            carrito.products.push({ product: productId, quantity });
+            // Verifica si el producto ya está en el carrito
+            const existeProducto = carrito.products.find(p => p.product.toString() === productId);
+
+            if (existeProducto) {
+                existeProducto.quantity += quantity;
+            } else {
+                carrito.products.push({ product: productId, quantity });
+            }
+
+            await carrito.save();
+            return carrito;
+        } catch (error) {
+            console.error("Error al agregar producto al carrito", error);
+            throw error;
         }
+    }
 
-        await this.guardarCarritos();
-        return carrito;
+    // Actualizar el carrito
+    async updateCart(cartId, updatedCart) {
+        try {
+            const carritoActualizado = await CartModel.findByIdAndUpdate(cartId, updatedCart, { new: true });
+            if (!carritoActualizado) {
+                throw new Error(`No se pudo actualizar el carrito con id ${cartId}`);
+            }
+            return carritoActualizado;
+        } catch (error) {
+            console.error("Error al actualizar el carrito", error);
+            throw error;
+        }
+    }
+
+    // Eliminar carrito
+    async deleteCart(cartId) {
+        try {
+            await CartModel.findByIdAndDelete(cartId);
+        } catch (error) {
+            console.error("Error al eliminar el carrito", error);
+            throw error;
+        }
     }
 }
 

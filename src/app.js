@@ -6,20 +6,40 @@ import cartsRouter from "./routes/routes.carts.js";
 import viewsRouter from "./routes/router.views.js";
 import exphbs from "express-handlebars";
 import displayRoutes from "express-routemap";
-
-
+import MongoStore from "connect-mongo";
+import cookieParser from "cookie-parser";
+import passport from "passport";
+import initializedPassport from "./config/passport.config.js";
+import sessionRouter from "./routes/session.router.js";
+import session from 'express-session';
 const app = express();
 const port = 8080
 
-//rutas
-app.use("/api/products", productsRouter);
-app.use("/api/carts", cartsRouter);
-app.use("/", viewsRouter);
 
 //middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static("./src/public"))
+app.use(cookieParser());
+app.use(express.json());
+app.use(passport.initialize());
+initializedPassport();
+app.use(express.urlencoded({extended: true}));
+app.use(session({
+    secret: "secretmiki",
+    resave: true,
+    saveUninitialized: true,
+    store: MongoStore.create({
+        mongoUrl: "mongodb+srv://kanadesing:negros333@cluster0.cdmifvc.mongodb.net/login"
+    }),
+    cookie: { secure: true }
+}))
+
+//rutas
+app.use("/api/products", productsRouter);
+app.use("/api/carts", cartsRouter);
+app.use("/", viewsRouter);
+app.use("/api/sessions", sessionRouter); 
 
 
 //express-handlebars
@@ -40,29 +60,6 @@ import ProductManager from "./dao/fs/product-manager.js";
 const productManager = new ProductManager("./src/datos/products.json")
 
 const io = new Server(httpServer);
-/*
-io.on("connection", async (socket) => {
-    console.log("Un cliente se conecto");
-    
-    //enviamos un array de productos
-    socket.emit("productos", await productManager.getProducts());
-
-    //recibimos el evento eliminarproducto desde front
-    socket.on("eliminarProducto", async (id)=>{
-        await productManager.deleteProduct(id);
-
-        //le einvio la lista actualizada al cliente
-        io.socket.emit("productos", await productManager.getProducts())
-    })
-
-    //agregamos producto desde el form
-
-    socket.on("agregarProducto", async (producto)=>{
-        await productManager.addProduct(producto);
-        io.socket.emit("productos", await productManager.getProducts())
-    })
-});
-*/
 
 import mongoose from "mongoose";
 

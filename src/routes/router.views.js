@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Router } from "express";
 const router = express.Router();
 import ProductManager from "../dao/db/product-manager-mongo.js";
 import CartManager from "../dao/db/cart-manager-mongo.js";
@@ -6,7 +6,13 @@ import CartManager from "../dao/db/cart-manager-mongo.js";
 const productManager = new ProductManager();
 const cartManager = new CartManager();
 
-router.get("/products", async (req, res) => {
+//importamos los middlewares
+import { soloadmin, solouser } from "../middlewares/auth.js";
+import passport from "passport";
+
+//aplicamos los jwt passport a las rutas
+    
+router.get("/products", passport.authenticate("jwt", { session: false }), solouser, async (req, res) => {
     try {
         const { limit = 10, page = 1, sort, query } = req.query;
         console.log('Received query params:', { limit, page, sort, query });
@@ -71,6 +77,9 @@ router.get("/carts/:cid", async (req, res) => {
    
 })
 
+router.get("/realtimeproducts",passport.authenticate("jwt", {session: false}) ,soloadmin ,(req, res) => {
+    res.render("realtimeproduct"); 
+ })
 
 
 

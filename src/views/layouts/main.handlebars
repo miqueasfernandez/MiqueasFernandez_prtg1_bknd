@@ -17,6 +17,16 @@
     function removeFromCart(productId) {
         // Lógica para remover el producto del carrito
     }
+
+    
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const adminCode = document.getElementById('adminCode').value;
+        if (adminCode && adminCode !== "ADM1N") {
+            e.preventDefault();
+            alert('Código de administrador incorrecto');
+        }
+    });
+
 </script>
 
 </body>

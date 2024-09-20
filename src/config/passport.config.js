@@ -7,7 +7,7 @@ const JWTStrategy = jwt.Strategy; //Core de la estrategia de JWT.
 const ExtractJwt = jwt.ExtractJwt; //Extractor de jwt ya sea de header, cookies, etc. 
 
 import UserModel from "../dao/models/user.model.js";
-import createHash, {isValidPassword} from "../utils/hashbcrypt.js";
+import { createHash, isValidPassword } from "../utils/hashbcrypt.js"
 
 
 const localStrategy = local.Strategy;
@@ -20,7 +20,7 @@ const initializePassport = () => {    //creamnos la primer estrategia para regis
         passReqToCallback: true,//le pasamos una propiedad par acceder al objeto req       
         usernameField: "email",//el campo del username va a ser el mail
 
-    }, async (req, username, password, done) =>{
+    }, async (req, password, done) =>{
 
         const {first_name, last_name, usuario,  email, age} = req.body; // me guardo los datos que vienen en el body
 

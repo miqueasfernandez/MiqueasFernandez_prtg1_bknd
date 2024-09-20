@@ -40,6 +40,7 @@ const schema = new mongoose.Schema({
         type: String,
         default: "user"
     }
+   
 })
 
 

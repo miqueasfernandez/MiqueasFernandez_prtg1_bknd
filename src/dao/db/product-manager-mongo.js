@@ -5,71 +5,39 @@ import productModel from "../models/products.model.js";
 
 class ProductManager {
 
-    async addProduct({ title, description, price, img, code, stock, category, thumbnails }) {
-        try {
-
-            if (!title || !description || !price || !code || !stock || !category) {
-                console.log("Todos los campos son obligatorios");
-                return;
-            }
-
-            const existeProducto = await productModel.findOne({ code: code });
-
-            if (existeProducto) {
-                console.log("El código debe ser único");
-                return;
-            }
-
-            const newProduct = new productModel({
-                title,
-                description,
-                price,
-                img,
-                code,
-                stock,
-                category,
-                status: true,
-                thumbnails: thumbnails || []
-            });
-
-            await newProduct.save();
-
-        } catch (error) {
-            console.log("Error al agregar producto", error);
-            throw error;
-        }
-    }
-
-  
     async getProducts({ limit = 10, page = 1, sort, query } = {}) {
         try {
             const skip = (page - 1) * limit;
-
             let queryOptions = {};
-
+    
             if (query) {
                 queryOptions = { category: query };
             }
-
+    
+            console.log('Query Options:', queryOptions);
+    
             const sortOptions = {};
             if (sort) {
                 if (sort === 'asc' || sort === 'desc') {
                     sortOptions.price = sort === 'asc' ? 1 : -1;
                 }
             }
-
+    
+            console.log('Sort Options:', sortOptions);
+            console.log('Skip:', skip);
+            console.log('Limit:', limit);
+    
             const productos = await productModel
                 .find(queryOptions)
                 .sort(sortOptions)
                 .skip(skip)
                 .limit(limit);
-
+    
             const totalProducts = await productModel.countDocuments(queryOptions);
-
             const totalPages = Math.ceil(totalProducts / limit);
             const hasPrevPage = page > 1;
             const hasNextPage = page < totalPages;
-
+    
             return {
                 docs: productos,
                 totalPages,
@@ -82,11 +50,10 @@ class ProductManager {
                 nextLink: hasNextPage ? `/api/products?limit=${limit}&page=${page + 1}&sort=${sort}&query=${query}` : null,
             };
         } catch (error) {
-            console.log("Error al obtener los productos desde el product-manager-mongo", error);
+            console.log("Error al obtener los productos desde el product-manager-mongo", error.message, error.stack);
             throw error;
         }
     }
-
 
     
     async getProductById(id) {

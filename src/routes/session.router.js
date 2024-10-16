@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import passport from 'passport';
+import { passportCall } from '../utils/util.js';
 
 import userControllers from '../controllers/user.controllers.js';
 
@@ -18,11 +19,11 @@ router.get('/register', (req, res) => {
 
 
 // Ruta para renderizar la vista de home (por ejemplo)
-router.get('/current', (req, res) => {
-   
-    res.render('home', { user: req.user })
-   
+router.get('/current', passportCall("jwt"), (req, res) => {
+    console.log('Usuario:', req.user); // Verifica aquí
+    res.render('home', { user: req.user });
 });
+
 
 router.post('/register',userControllers.register);
 router.post('/login', userControllers.login);

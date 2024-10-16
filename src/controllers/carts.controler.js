@@ -1,6 +1,10 @@
 import cartManager from "../dao/db/cart-manager-mongo.js";
 import respuesta from "../utils/reutilizables.js";
 import ProductModel from "../dao/models/products.model.js";
+import UserModel from "../dao/models/user.model.js";
+import CartModel from "../dao/models/carts.model.js";
+import ticketModel from "../dao/models/tickets.model.js";
+import {calcularTotal} from "../utils/reutilizables.js";
 const cartmanager = new cartManager();
 
 class cartController {
@@ -23,7 +27,7 @@ class cartController {
         const cartId = req.params.cid;
     
         try {
-            const carrito = await cartManager.getCarritoById(cartId);
+            const carrito = await cartmanager.getCarritoById(cartId);
     
             if (!carrito) {
                 return res.status(404).json({ error: "Carrito no encontrado" });
@@ -43,7 +47,7 @@ class cartController {
         const quantity = req.body.quantity || 1;
     
         try {
-            const carritoActualizado = await cartManager.agregarProductoAlCarrito(cartId, productId, quantity);
+            const carritoActualizado = await cartmanager.agregarProductoAlCarrito(cartId, productId, quantity);
             res.json(carritoActualizado.products);
         } catch (error) {
             console.error("Error al agregar producto al carrito", error);
@@ -57,7 +61,7 @@ class cartController {
         const CarritoActualizado = req.body;
     
         try {
-            const updatedCart = await cartManager.updateCart(cartId, CarritoActualizado);
+            const updatedCart = await cartmanager.updatecart(cartId, CarritoActualizado);
             res.json(updatedCart);
         } catch (error) {
             console.error("Error al actualizar carrito", error);
@@ -70,7 +74,7 @@ class cartController {
         const cartId = req.params.cid;
     
         try {
-            await cartManager.deleteCart(cartId);
+            await cartmanager.deleteCart(cartId);
             res.json({ message: "Carrito eliminado exitosamente" });
         } catch (error) {
             console.error("Error al eliminar carrito", error);
@@ -82,12 +86,15 @@ class cartController {
         const carritoId = req.params.cid;
         try {
             const carrito = await CartModel.findById(carritoId);
-            const arrayProductos = carrito.products;
+            if (!carrito) {
+                return res.status(404).json({ error: "Carrito no encontrado" });
+            }
+            const arrayProductos = carrito.products || [];
             
             const productosNoDisponibles = [];
     
             for (const item of arrayProductos){
-                const productId = item.products
+                const productId = item.product
                 const products = await ProductModel.findById(productId);
     
                 if(products.stock >= item.quantity){
@@ -95,30 +102,43 @@ class cartController {
                     await products.save();
                 }else{
                     productosNoDisponibles.push(productId)
+                    console.log(productosNoDisponibles, "cantidad ", productosNoDisponibles.length);
+                    
                 }
             }
     
             // a quien le pertenece este carrito? necesitamos el usuario para hacer el ticket
     
-            const usuarioDelCarrito = await UserModel.findOne({cart: carritoId});
-    
+            const usuarioDelCarrito = await UserModel.findOne({cartId: carritoId});
+            if (!usuarioDelCarrito) {
+                return res.status(404).json({ error: "Usuario no encontrado para este carrito", });
+                
+                
+            }
+            console.log("Usuario del carrito:", usuarioDelCarrito);
+
             const ticket = new ticketModel({
                 purchased_datetime:  new Date(),
                 amount: calcularTotal(carrito.products),
-                purchaser: usuarioDelCarrito.email
+                purchaser: usuarioDelCarrito.usuario,
+
+                
+
             })
-    
+            
             await ticket.save();
     
-            carrito.products = cart.products.filter(item => productosNoDisponibles.some
-                (productId => productId.equals(item.products)));
+            carrito.products = carrito.products.filter(item => productosNoDisponibles.some
+                (productId => productId.equals(item.product)));
     
             await carrito.save();
     
             //testeamos con postman
     
         } catch (error) {
+            console.error("Error:", error);
             res.status(500).json({ error: "Error interno del servidor en la ruta /purchase" });
+            
         }
 
     }
